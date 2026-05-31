@@ -44,7 +44,6 @@ export default function DayN() {
       .eq('day_number', dayNum)
       .single()
     if (data?.content) setForm(data.content)
-    else setForm({})
   }
 
   async function save() {
