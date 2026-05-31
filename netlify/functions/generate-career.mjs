@@ -83,7 +83,3 @@ ${journalText}
     })
   }
 }
-
-export const config = {
-  path: '/api/generate-career'
-}
