@@ -109,7 +109,10 @@ export default function Report() {
     try {
       const res = await fetch('https://npnwwqelrlrwletssnxo.supabase.co/functions/v1/generate-report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wbnd3cWVscmxyd2xldHNzbnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjI4MzgsImV4cCI6MjA5NTc5ODgzOH0.ckuC1QzVtcBgFFduP4wjxGH7eGfQRQuCeiB1uYV2a8g`,
+        },
         body: JSON.stringify({
           entries: Object.entries(entriesData || entries).map(([k, v]) => ({ day_number: parseInt(k), content: v })),
           profile: { name: profile.name || profile.nickname }
