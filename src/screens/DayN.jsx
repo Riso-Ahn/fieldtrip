@@ -31,10 +31,11 @@ export default function DayN() {
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({})
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (profile) loadEntry()
-  }, [profile, dayNum])
+    if (profile?.id && !loaded) loadEntry()
+  }, [profile?.id])
 
   async function loadEntry() {
     const { data } = await supabase
@@ -44,6 +45,7 @@ export default function DayN() {
       .eq('day_number', dayNum)
       .single()
     if (data?.content) setForm(data.content)
+    setLoaded(true)
   }
 
   async function save() {
