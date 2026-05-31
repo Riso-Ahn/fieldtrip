@@ -37,7 +37,7 @@ export default function Dashboard() {
       <div className="top-bar">
         <div>
           <div style={{ fontWeight: 700, fontSize: 18 }}>현장학습 일지</div>
-          <div className="muted" style={{ marginTop: 2 }}>안녕하세요, {profile?.name}님</div>
+          <div className="muted" style={{ marginTop: 2 }}>안녕하세요, {profile?.name || profile?.nickname}님</div>
         </div>
         <button className="btn btn-sm" onClick={signOut}>로그아웃</button>
       </div>
