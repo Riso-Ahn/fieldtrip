@@ -253,7 +253,11 @@ export default function Report() {
       <div style={{ background:'#1a1a1a', borderRadius:16, padding:'1.5rem 2rem', marginBottom:'1rem', color:'#fff' }}>
         <div style={{ fontSize:11, color:'#888', marginBottom:4, letterSpacing:'0.05em', textTransform:'uppercase' }}>목표 진로</div>
         <div style={{ fontSize:28, fontWeight:700, marginBottom:8 }}>{day5.career || '—'}</div>
-        <div style={{ fontSize:13, color:'#aaa', lineHeight:1.7 }}>{day5.reason}</div>
+        <div style={{ fontSize:13, color:'#aaa', lineHeight:1.9 }}>
+          {(day5.reason || '').split(/(?=\d\.)/).filter(Boolean).map((line, i) => (
+            <div key={i} style={{ marginBottom: 4 }}>{line.trim()}</div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
@@ -262,8 +266,9 @@ export default function Report() {
           <div style={{ maxWidth:300, margin:'0 auto' }}>
             <Radar data={chartData} options={{
               responsive: true,
-              scales: { r: { min:0, max:10, ticks:{ stepSize:2, font:{size:10} } } },
-              plugins: { legend: { position:'bottom', labels:{ font:{size:11}, padding:12 } } }
+              scales: { r: { min:0, max:10, ticks:{ stepSize:2, font:{size:10} }, pointLabels:{ font:{size:10}, padding:8 } } },
+              plugins: { legend: { position:'bottom', labels:{ font:{size:11}, padding:12 } } },
+              layout: { padding: { top:16, left:16, right:16, bottom:8 } }
             }} />
           </div>
           <div style={{ marginTop:'1rem' }}>
