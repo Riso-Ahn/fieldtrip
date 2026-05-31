@@ -22,6 +22,8 @@ export default async function handler(req, context) {
     return ''
   }).filter(Boolean).join('\n')
 
+  const career = entries?.find?.(e=>e.day_number===5)?.content?.career || '창업가'
+
   const prompt = `당신은 청소년 진로 코치입니다. 해외 창업 생태계 탐방 프로그램 참가자(${profile?.name||'학생'})의 5일간 일지를 분석해서 아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 절대 포함하지 마세요.
 
 일지 내용:
@@ -39,8 +41,76 @@ ${journalText}
     {"day": 2, "keyword": "2-3단어 핵심키워드", "summary": "핵심 인사이트 한 문장"},
     {"day": 3, "keyword": "2-3단어 핵심키워드", "summary": "핵심 인사이트 한 문장"},
     {"day": 4, "keyword": "2-3단어 핵심키워드", "summary": "핵심 인사이트 한 문장"}
+  ],
+  "ideal_scores": {
+    "전문 지식 (도메인 이해)": 9,
+    "네트워크 / 관계 형성": 8,
+    "커뮤니케이션 / 설득력": 9,
+    "실행력 / 추진력": 9,
+    "창의성 / 문제해결": 8,
+    "글로벌 감각 / 언어": 7
+  },
+  "roadmap": [
+    {
+      "category": "도메인 학습",
+      "phases": [
+        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
+      ]
+    },
+    {
+      "category": "네트워크 구축",
+      "phases": [
+        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
+      ]
+    },
+    {
+      "category": "실행 경험",
+      "phases": [
+        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
+      ]
+    },
+    {
+      "category": "글로벌 역량",
+      "phases": [
+        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
+      ]
+    },
+    {
+      "category": "창업 준비",
+      "phases": [
+        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
+        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
+      ]
+    }
   ]
-}`
+}
+
+ideal_scores는 "${career}" 진로에 필요한 각 역량의 이상적인 목표 점수(1-10)를 설정해주세요.
+roadmap의 각 goal과 milestone은 학생의 일지 내용, 강점, 부족한 점을 반영해서 구체적이고 실행 가능하게 작성해주세요.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -52,7 +122,7 @@ ${journalText}
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
+        max_tokens: 3000,
         messages: [{ role: 'user', content: prompt }]
       })
     })

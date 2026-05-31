@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Radar } from 'react-chartjs-2'
 import {
@@ -10,6 +10,71 @@ import { useAuth } from '../App'
 import { GAP_SKILLS } from '../lib/constants'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
+
+const PERIODS = ['1개월', '3개월', '6개월', '1년', '3년', '5년']
+const PERIOD_COLORS = ['#1a1a1a', '#2D6A4F', '#40916C', '#52B788', '#74C69D', '#95D5B2']
+
+function GanttChart({ roadmap }) {
+  const [hoveredCell, setHoveredCell] = useState(null)
+  if (!roadmap?.length) return null
+
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
+        <thead>
+          <tr>
+            <th style={{ width: 120, padding: '8px 12px', textAlign: 'left', fontSize: 12, color: '#888', fontWeight: 600, borderBottom: '1px solid #e8e7e0' }}>카테고리</th>
+            {PERIODS.map((p, i) => (
+              <th key={p} style={{ padding: '8px 8px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#fff', background: PERIOD_COLORS[i], borderBottom: '1px solid #e8e7e0', minWidth: i >= 3 ? 140 : 110 }}>
+                {p}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {roadmap.map((row, ri) => (
+            <tr key={ri} style={{ borderBottom: '1px solid #f0efea' }}>
+              <td style={{ padding: '10px 12px', fontSize: 12, fontWeight: 600, color: '#1a1a1a', background: '#fafaf8', whiteSpace: 'nowrap' }}>
+                {row.category}
+              </td>
+              {PERIODS.map((p, pi) => {
+                const phase = row.phases?.find(ph => ph.period === p)
+                const isHovered = hoveredCell === `${ri}-${pi}`
+                return (
+                  <td
+                    key={p}
+                    style={{ padding: '6px 8px', verticalAlign: 'top', position: 'relative', cursor: phase ? 'pointer' : 'default' }}
+                    onMouseEnter={() => phase && setHoveredCell(`${ri}-${pi}`)}
+                    onMouseLeave={() => setHoveredCell(null)}
+                  >
+                    {phase && (
+                      <div style={{
+                        background: PERIOD_COLORS[pi],
+                        borderRadius: 6,
+                        padding: '6px 8px',
+                        opacity: isHovered ? 1 : 0.85,
+                        transition: 'all 0.15s',
+                        transform: isHovered ? 'scale(1.02)' : 'scale(1)'
+                      }}>
+                        <div style={{ fontSize: 11, color: '#fff', lineHeight: 1.5, fontWeight: 500 }}>{phase.goal}</div>
+                        {isHovered && (
+                          <div style={{ marginTop: 4, fontSize: 10, color: 'rgba(255,255,255,0.8)', lineHeight: 1.4, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 4 }}>
+                            🎯 {phase.milestone}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ marginTop: 8, fontSize: 11, color: '#aaa' }}>* 각 셀에 마우스를 올리면 달성 지표를 확인할 수 있습니다</div>
+    </div>
+  )
+}
 
 export default function Report() {
   const { profile } = useAuth()
@@ -33,7 +98,7 @@ export default function Report() {
     const map = {}
     data?.forEach(e => { map[e.day_number] = e.content })
     setEntries(map)
-    const saved = localStorage.getItem(`report_${profile.id}`)
+    const saved = localStorage.getItem(`report_v2_${profile.id}`)
     if (saved) setReport(JSON.parse(saved))
     else await generateReport(map)
     setLoading(false)
@@ -53,7 +118,7 @@ export default function Report() {
       const json = await res.json()
       if (json.report) {
         setReport(json.report)
-        localStorage.setItem(`report_${profile.id}`, JSON.stringify(json.report))
+        localStorage.setItem(`report_v2_${profile.id}`, JSON.stringify(json.report))
       }
     } catch (e) { console.error(e) }
     setAiLoading(false)
@@ -69,74 +134,64 @@ export default function Report() {
     const name = profile.name || profile.nickname || '학생'
     const C = { dark:'1a1a1a', mid:'444444', light:'888888', bg:'F7F7F5', white:'FFFFFF', accent:'2D6A4F' }
 
-    // Slide 1: Cover
     const s1 = prs.addSlide()
     s1.background = { color: C.dark }
     s1.addText('해외 현장학습', { x:0.6, y:0.5, w:11.8, h:0.6, fontSize:18, color:C.light, fontFace:'Calibri' })
     s1.addText('진로 계획서', { x:0.6, y:1.1, w:11.8, h:1.4, fontSize:52, bold:true, color:C.white, fontFace:'Calibri' })
     s1.addText(name, { x:0.6, y:2.6, w:8, h:0.6, fontSize:22, color:'A8D5B5', fontFace:'Calibri' })
-    s1.addText(day5.career || 'AI 스타트업 창업자', { x:0.6, y:3.2, w:8, h:0.5, fontSize:16, color:C.light, fontFace:'Calibri', italic:true })
+    s1.addText(day5.career || '', { x:0.6, y:3.2, w:8, h:0.5, fontSize:16, color:C.light, fontFace:'Calibri', italic:true })
     const dayColors = ['2D6A4F','40916C','52B788','74C69D','95D5B2']
-    const dayKeywords = [
-      report?.day_summaries?.[0]?.keyword || 'AI 생태계',
-      report?.day_summaries?.[1]?.keyword || '스타트업',
-      report?.day_summaries?.[2]?.keyword || '정책혁신',
-      report?.day_summaries?.[3]?.keyword || '투자실행',
-      report?.day_summaries?.[4]?.keyword || '문제발견',
-    ]
-    dayKeywords.forEach((kw, i) => {
+    ;(report?.day_summaries||[]).slice(0,5).forEach((s, i) => {
       s1.addShape(prs.ShapeType.rect, { x:0.6+i*2.4, y:4.2, w:2.2, h:0.7, fill:{color:dayColors[i]}, line:{color:dayColors[i]} })
-      s1.addText(`Day ${i+1}\n${kw}`, { x:0.6+i*2.4, y:4.2, w:2.2, h:0.7, fontSize:9, color:C.white, fontFace:'Calibri', align:'center', valign:'middle' })
+      s1.addText(`Day ${i+1}\n${s.keyword||''}`, { x:0.6+i*2.4, y:4.2, w:2.2, h:0.7, fontSize:9, color:C.white, fontFace:'Calibri', align:'center', valign:'middle' })
     })
 
-    // Slide 2: Gap Analysis
     const s2 = prs.addSlide()
     s2.background = { color: C.bg }
     s2.addText('갭 분석 & 진로 방향', { x:0.5, y:0.3, w:12, h:0.6, fontSize:24, bold:true, color:C.dark, fontFace:'Calibri' })
-    s2.addShape(prs.ShapeType.rect, { x:0.5, y:1.0, w:5.5, h:1.0, fill:{color:C.dark}, line:{color:C.dark} })
-    s2.addText('목표 진로', { x:0.5, y:1.0, w:5.5, h:0.35, fontSize:11, color:C.light, fontFace:'Calibri', align:'center', valign:'middle' })
-    s2.addText(day5.career || 'AI 스타트업 창업자', { x:0.5, y:1.35, w:5.5, h:0.65, fontSize:18, bold:true, color:C.white, fontFace:'Calibri', align:'center', valign:'middle' })
+    s2.addShape(prs.ShapeType.rect, { x:0.5, y:1.0, w:5.5, h:0.9, fill:{color:C.dark}, line:{color:C.dark} })
+    s2.addText('목표 진로', { x:0.5, y:1.0, w:5.5, h:0.3, fontSize:11, color:C.light, fontFace:'Calibri', align:'center', valign:'middle' })
+    s2.addText(day5.career || '', { x:0.5, y:1.3, w:5.5, h:0.6, fontSize:18, bold:true, color:C.white, fontFace:'Calibri', align:'center', valign:'middle' })
+    const idealScores = report?.ideal_scores || {}
     const skillShort = ['도메인 이해','네트워크','커뮤니케이션','실행력','창의성','글로벌']
     GAP_SKILLS.forEach((skill, i) => {
-      const score = scores[skill] || 5
-      const y = 2.2 + i * 0.42
+      const current = scores[skill] || 5
+      const ideal = idealScores[skill] || 8
+      const y = 2.1 + i * 0.42
       s2.addText(skillShort[i], { x:0.5, y, w:1.8, h:0.35, fontSize:11, color:C.mid, fontFace:'Calibri', valign:'middle' })
-      s2.addShape(prs.ShapeType.rect, { x:2.4, y:y+0.05, w:3.5, h:0.25, fill:{color:'E0E0DC'}, line:{color:'E0E0DC'} })
-      s2.addShape(prs.ShapeType.rect, { x:2.4, y:y+0.05, w:3.5*score/10, h:0.25, fill:{color:C.accent}, line:{color:C.accent} })
-      s2.addText(`${score}점`, { x:6.0, y, w:0.6, h:0.35, fontSize:11, bold:true, color:C.dark, fontFace:'Calibri', valign:'middle' })
+      s2.addShape(prs.ShapeType.rect, { x:2.4, y:y+0.05, w:3.0, h:0.22, fill:{color:'E0E0DC'}, line:{color:'E0E0DC'} })
+      s2.addShape(prs.ShapeType.rect, { x:2.4, y:y+0.05, w:3.0*ideal/10, h:0.22, fill:{color:'C0DD97'}, line:{color:'C0DD97'} })
+      s2.addShape(prs.ShapeType.rect, { x:2.4, y:y+0.05, w:3.0*current/10, h:0.22, fill:{color:C.dark}, line:{color:C.dark} })
+      s2.addText(`${current}→${ideal}`, { x:5.5, y, w:0.8, h:0.35, fontSize:10, color:C.dark, fontFace:'Calibri', valign:'middle' })
     })
     s2.addText('선택 이유', { x:6.8, y:1.0, w:5.6, h:0.35, fontSize:12, bold:true, color:C.mid, fontFace:'Calibri' })
-    s2.addText(day5.reason || '', { x:6.8, y:1.4, w:5.6, h:2.0, fontSize:12, color:C.dark, fontFace:'Calibri', valign:'top', wrap:true })
-    s2.addShape(prs.ShapeType.rect, { x:6.8, y:3.5, w:5.6, h:1.3, fill:{color:'EAF3DE'}, line:{color:'C0DD97'} })
-    s2.addText('5년 후', { x:6.9, y:3.55, w:2, h:0.3, fontSize:11, color:'27500A', bold:true, fontFace:'Calibri' })
-    s2.addText(day5.future || '', { x:6.9, y:3.85, w:5.4, h:0.9, fontSize:11, color:C.dark, fontFace:'Calibri', wrap:true, valign:'top' })
+    s2.addText(day5.reason || '', { x:6.8, y:1.4, w:5.6, h:1.8, fontSize:11, color:C.dark, fontFace:'Calibri', valign:'top', wrap:true })
+    s2.addShape(prs.ShapeType.rect, { x:6.8, y:3.3, w:5.6, h:1.5, fill:{color:'EAF3DE'}, line:{color:'C0DD97'} })
+    s2.addText('5년 후', { x:6.9, y:3.35, w:2, h:0.3, fontSize:11, color:'27500A', bold:true, fontFace:'Calibri' })
+    s2.addText(day5.future || '', { x:6.9, y:3.65, w:5.3, h:1.0, fontSize:11, color:C.dark, fontFace:'Calibri', wrap:true, valign:'top' })
 
-    // Slide 3: Milestones + Daily Summary
     const s3 = prs.addSlide()
     s3.background = { color: C.white }
-    s3.addText('실행 계획 & 일지 요약', { x:0.5, y:0.3, w:12, h:0.6, fontSize:24, bold:true, color:C.dark, fontFace:'Calibri' })
-    const milestones = [
-      { label:'1개월', value:day5.action1||'', color:C.dark },
-      { label:'1년', value:day5.action2||'', color:C.accent },
-      { label:'5년', value:day5.future||'', color:'27500A' },
-    ]
-    milestones.forEach((m, i) => {
-      const x = 0.5 + i * 4.1
-      s3.addShape(prs.ShapeType.rect, { x, y:1.1, w:3.8, h:0.4, fill:{color:m.color}, line:{color:m.color} })
-      s3.addText(m.label, { x, y:1.1, w:3.8, h:0.4, fontSize:13, bold:true, color:C.white, fontFace:'Calibri', align:'center', valign:'middle' })
-      s3.addShape(prs.ShapeType.rect, { x, y:1.5, w:3.8, h:1.3, fill:{color:'F7F7F5'}, line:{color:'E0E0DC'} })
-      s3.addText(m.value, { x:x+0.1, y:1.55, w:3.6, h:1.2, fontSize:11, color:C.dark, fontFace:'Calibri', wrap:true, valign:'top' })
+    s3.addText('5개년 성장 로드맵', { x:0.5, y:0.3, w:12, h:0.5, fontSize:22, bold:true, color:C.dark, fontFace:'Calibri' })
+    const periods = ['1개월','3개월','6개월','1년','3년','5년']
+    const pColors = ['1a1a1a','2D6A4F','40916C','52B788','74C69D','95D5B2']
+    const colW = 1.9
+    periods.forEach((p, pi) => {
+      s3.addShape(prs.ShapeType.rect, { x:2.0+pi*colW, y:0.9, w:colW-0.05, h:0.35, fill:{color:pColors[pi]}, line:{color:pColors[pi]} })
+      s3.addText(p, { x:2.0+pi*colW, y:0.9, w:colW-0.05, h:0.35, fontSize:11, bold:true, color:'FFFFFF', fontFace:'Calibri', align:'center', valign:'middle' })
     })
-    s3.addText('일자별 핵심 인사이트', { x:0.5, y:3.0, w:12, h:0.4, fontSize:14, bold:true, color:C.mid, fontFace:'Calibri' })
-    const summaries = report?.day_summaries || []
-    summaries.slice(0,4).forEach((s, i) => {
-      const x = 0.5 + i * 3.1
-      s3.addShape(prs.ShapeType.rect, { x, y:3.5, w:2.9, h:1.3, fill:{color:'F7F7F5'}, line:{color:'E0E0DC'} })
-      s3.addText(`Day ${i+1}`, { x:x+0.1, y:3.55, w:1.5, h:0.3, fontSize:11, bold:true, color:C.accent, fontFace:'Calibri' })
-      s3.addText(s.summary||'', { x:x+0.1, y:3.85, w:2.7, h:0.9, fontSize:10, color:C.dark, fontFace:'Calibri', wrap:true, valign:'top' })
+    ;(report?.roadmap||[]).slice(0,5).forEach((row, ri) => {
+      const y = 1.35 + ri * 0.9
+      s3.addShape(prs.ShapeType.rect, { x:0.4, y, w:1.55, h:0.8, fill:{color:'F0EFE8'}, line:{color:'E0DFD8'} })
+      s3.addText(row.category, { x:0.4, y, w:1.55, h:0.8, fontSize:10, bold:true, color:C.dark, fontFace:'Calibri', align:'center', valign:'middle', wrap:true })
+      periods.forEach((p, pi) => {
+        const phase = row.phases?.find(ph => ph.period === p)
+        if (phase) {
+          s3.addShape(prs.ShapeType.rect, { x:2.0+pi*colW, y:y+0.04, w:colW-0.1, h:0.72, fill:{color:pColors[pi]+'22'}, line:{color:pColors[pi]} })
+          s3.addText(phase.goal, { x:2.05+pi*colW, y:y+0.06, w:colW-0.18, h:0.65, fontSize:8, color:C.dark, fontFace:'Calibri', wrap:true, valign:'top' })
+        }
+      })
     })
-    s3.addShape(prs.ShapeType.rect, { x:0.5, y:5.0, w:12, h:0.7, fill:{color:C.dark}, line:{color:C.dark} })
-    s3.addText(`계속 연결하고 싶은 것  |  ${day5.connect||''}`, { x:0.6, y:5.0, w:11.8, h:0.7, fontSize:12, color:C.white, fontFace:'Calibri', valign:'middle' })
 
     await prs.writeFile({ fileName: `${name}_진로계획서.pptx` })
     setPptLoading(false)
@@ -144,9 +199,31 @@ export default function Report() {
 
   const day5 = entries[5] || {}
   const scores = day5.scores || {}
+  const idealScores = report?.ideal_scores || {}
+
   const chartData = {
     labels: GAP_SKILLS,
-    datasets: [{ label:'현재 수준', data:GAP_SKILLS.map(s => scores[s]||5), backgroundColor:'rgba(26,26,26,0.08)', borderColor:'#1a1a1a', borderWidth:2, pointBackgroundColor:'#1a1a1a', pointRadius:4 }]
+    datasets: [
+      {
+        label: '현재 수준',
+        data: GAP_SKILLS.map(s => scores[s] || 5),
+        backgroundColor: 'rgba(26,26,26,0.1)',
+        borderColor: '#1a1a1a',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#1a1a1a',
+        pointRadius: 4
+      },
+      {
+        label: '목표 수준',
+        data: GAP_SKILLS.map(s => idealScores[s] || 8),
+        backgroundColor: 'rgba(45,106,79,0.08)',
+        borderColor: '#2D6A4F',
+        borderWidth: 2,
+        borderDash: [5, 4],
+        pointBackgroundColor: '#2D6A4F',
+        pointRadius: 3
+      }
+    ]
   }
 
   if (loading) return (
@@ -156,7 +233,7 @@ export default function Report() {
   )
 
   return (
-    <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem 1rem' }}>
+    <div style={{ maxWidth:960, margin:'0 auto', padding:'1.5rem 1rem' }}>
       <div className="top-bar">
         <div>
           <div style={{ fontWeight:700, fontSize:20 }}>진로계획 리포트</div>
@@ -164,45 +241,61 @@ export default function Report() {
         </div>
         <div style={{ display:'flex', gap:8 }}>
           <button className="btn btn-sm" onClick={() => navigate('/dashboard')}>← 뒤로</button>
+          <button className="btn btn-sm" onClick={() => { localStorage.removeItem(`report_v2_${profile.id}`); generateReport(entries) }} disabled={aiLoading}>
+            {aiLoading ? <span className="spinner" /> : '↻ 재분석'}
+          </button>
           <button className="btn btn-primary" onClick={exportPPT} disabled={pptLoading}>
             {pptLoading ? <span className="spinner" /> : '📥 PPT 내보내기'}
           </button>
         </div>
       </div>
 
-      <div style={{ background:'#1a1a1a', borderRadius:16, padding:'2rem', marginBottom:'1rem', color:'#fff' }}>
-        <div style={{ fontSize:12, color:'#888', marginBottom:4 }}>목표 진로</div>
+      <div style={{ background:'#1a1a1a', borderRadius:16, padding:'1.5rem 2rem', marginBottom:'1rem', color:'#fff' }}>
+        <div style={{ fontSize:11, color:'#888', marginBottom:4, letterSpacing:'0.05em', textTransform:'uppercase' }}>목표 진로</div>
         <div style={{ fontSize:28, fontWeight:700, marginBottom:8 }}>{day5.career || '—'}</div>
-        <div style={{ fontSize:14, color:'#aaa', lineHeight:1.6 }}>{day5.reason}</div>
+        <div style={{ fontSize:13, color:'#aaa', lineHeight:1.7 }}>{day5.reason}</div>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
         <div className="card">
           <div className="section-title">갭 분석</div>
-          <div style={{ maxWidth:280, margin:'0 auto' }}>
-            <Radar data={chartData} options={{ responsive:true, scales:{ r:{ min:0, max:10, ticks:{ stepSize:2, font:{size:10} } } }, plugins:{ legend:{display:false} } }} />
+          <div style={{ maxWidth:300, margin:'0 auto' }}>
+            <Radar data={chartData} options={{
+              responsive: true,
+              scales: { r: { min:0, max:10, ticks:{ stepSize:2, font:{size:10} } } },
+              plugins: { legend: { position:'bottom', labels:{ font:{size:11}, padding:12 } } }
+            }} />
           </div>
           <div style={{ marginTop:'1rem' }}>
             {GAP_SKILLS.map(skill => {
-              const score = scores[skill] || 5
+              const current = scores[skill] || 5
+              const ideal = idealScores[skill] || 8
+              const gap = ideal - current
               return (
-                <div key={skill} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
-                  <span style={{ fontSize:12, flex:1, color:'#444' }}>{skill}</span>
-                  <div style={{ width:80, height:6, background:'#e8e7e0', borderRadius:3, overflow:'hidden' }}>
-                    <div style={{ width:`${score*10}%`, height:'100%', background:'#1a1a1a', borderRadius:3 }} />
+                <div key={skill} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+                  <span style={{ fontSize:11, flex:1, color:'#444' }}>{skill}</span>
+                  <div style={{ width:100, height:8, background:'#e8e7e0', borderRadius:4, overflow:'hidden', position:'relative' }}>
+                    <div style={{ position:'absolute', left:0, top:0, width:`${ideal*10}%`, height:'100%', background:'#c0dd97', borderRadius:4 }} />
+                    <div style={{ position:'absolute', left:0, top:0, width:`${current*10}%`, height:'100%', background:'#1a1a1a', borderRadius:4 }} />
                   </div>
-                  <span style={{ fontSize:12, fontWeight:600, minWidth:24 }}>{score}</span>
+                  <span style={{ fontSize:11, fontWeight:600, minWidth:36, color: gap > 2 ? '#a32d2d' : gap > 0 ? '#633806' : '#27500a' }}>
+                    {current}→{ideal}
+                  </span>
                 </div>
               )
             })}
+            <div style={{ display:'flex', gap:12, marginTop:8 }}>
+              <span style={{ fontSize:10, color:'#888' }}>■ 현재</span>
+              <span style={{ fontSize:10, color:'#2D6A4F' }}>■ 목표</span>
+            </div>
           </div>
         </div>
 
         <div className="card">
           <div className="section-title">실행 마일스톤</div>
           {[
-            { label:'1개월 목표', value:day5.action1, color:'#1a1a1a' },
-            { label:'1년 목표', value:day5.action2, color:'#2D6A4F' },
+            { label:'1개월', value:day5.action1, color:'#1a1a1a' },
+            { label:'1년', value:day5.action2, color:'#2D6A4F' },
             { label:'5년 비전', value:day5.future, color:'#27500A' },
           ].map(m => (
             <div key={m.label} style={{ marginBottom:'1rem' }}>
@@ -210,44 +303,42 @@ export default function Report() {
               <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.6, background:'#fafaf8', borderRadius:8, padding:'8px 12px' }}>{m.value || '—'}</div>
             </div>
           ))}
-          <div style={{ marginTop:'0.5rem' }}>
+          <div>
             <div style={{ fontSize:11, fontWeight:600, color:'#888', marginBottom:6 }}>계속 연결하고 싶은 것</div>
             <div style={{ fontSize:13, color:'#444', lineHeight:1.6 }}>{day5.connect || '—'}</div>
           </div>
         </div>
       </div>
 
-      {(report || aiLoading) && (
+      <div className="card" style={{ marginBottom:'1rem' }}>
+        <div className="section-title">5개년 성장 로드맵</div>
+        {aiLoading ? (
+          <div style={{ textAlign:'center', padding:'2rem', color:'#888' }}>AI가 맞춤형 로드맵을 생성하고 있습니다...</div>
+        ) : (
+          <GanttChart roadmap={report?.roadmap} />
+        )}
+      </div>
+
+      {report && !aiLoading && (
         <div className="card" style={{ marginBottom:'1rem' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
-            <div className="section-title" style={{ margin:0 }}>AI 분석 리포트</div>
-            <button className="btn btn-sm" onClick={() => generateReport(entries)} disabled={aiLoading}>
-              {aiLoading ? <span className="spinner" /> : '↻ 재분석'}
-            </button>
-          </div>
-          {aiLoading ? (
-            <div style={{ textAlign:'center', padding:'2rem', color:'#888' }}>AI가 5일간의 일지를 분석하고 있습니다...</div>
-          ) : (
-            <>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
-                {[
-                  { label:'핵심 인사이트', value:report?.insight },
-                  { label:'진로 적합성', value:report?.career_fit },
-                  { label:'강점 활용', value:report?.strength },
-                  { label:'갭 보완 전략', value:report?.gap_strategy },
-                ].map(item => (
-                  <div key={item.label} style={{ background:'#fafaf8', borderRadius:8, padding:'1rem' }}>
-                    <div style={{ fontSize:12, fontWeight:600, color:'#888', marginBottom:6 }}>{item.label}</div>
-                    <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.7 }}>{item.value}</div>
-                  </div>
-                ))}
+          <div className="section-title">AI 분석 리포트</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
+            {[
+              { label:'핵심 인사이트', value:report.insight },
+              { label:'진로 적합성', value:report.career_fit },
+              { label:'강점 활용', value:report.strength },
+              { label:'갭 보완 전략', value:report.gap_strategy },
+            ].map(item => (
+              <div key={item.label} style={{ background:'#fafaf8', borderRadius:8, padding:'1rem' }}>
+                <div style={{ fontSize:12, fontWeight:600, color:'#888', marginBottom:6 }}>{item.label}</div>
+                <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.7 }}>{item.value}</div>
               </div>
-              {report?.message && (
-                <div style={{ marginTop:'1rem', background:'#1a1a1a', borderRadius:8, padding:'1rem', color:'#fff', fontSize:14, textAlign:'center', lineHeight:1.6 }}>
-                  💬 {report.message}
-                </div>
-              )}
-            </>
+            ))}
+          </div>
+          {report.message && (
+            <div style={{ marginTop:'1rem', background:'#1a1a1a', borderRadius:8, padding:'1rem', color:'#fff', fontSize:14, textAlign:'center', lineHeight:1.6 }}>
+              💬 {report.message}
+            </div>
           )}
         </div>
       )}
