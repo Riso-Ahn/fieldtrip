@@ -51,61 +51,36 @@ ${journalText}
     "글로벌 감각 / 언어": 7
   },
   "roadmap": [
-    {
-      "category": "도메인 학습",
-      "phases": [
-        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
-      ]
-    },
-    {
-      "category": "네트워크 구축",
-      "phases": [
-        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
-      ]
-    },
-    {
-      "category": "실행 경험",
-      "phases": [
-        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
-      ]
-    },
-    {
-      "category": "글로벌 역량",
-      "phases": [
-        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
-      ]
-    },
-    {
-      "category": "창업 준비",
-      "phases": [
-        {"period": "1개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "6개월", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "1년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "3년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"},
-        {"period": "5년", "goal": "구체적 달성 목표 한 문장", "milestone": "측정 가능한 결과물"}
-      ]
-    }
+  {"category": "도메인 학습", "phases": [
+  {"period": "1개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "6개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "1년", "goal": "목표", "milestone": "결과물"},
+  {"period": "5년", "goal": "목표", "milestone": "결과물"}
+  ]},
+  {"category": "네트워크 구축", "phases": [
+  {"period": "1개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "6개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "1년", "goal": "목표", "milestone": "결과물"},
+    {"period": "5년", "goal": "목표", "milestone": "결과물"}
+  ]},
+  {"category": "실행 경험", "phases": [
+  {"period": "1개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "6개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "1년", "goal": "목표", "milestone": "결과물"},
+  {"period": "5년", "goal": "목표", "milestone": "결과물"}
+  ]},
+  {"category": "글로벌 역량", "phases": [
+  {"period": "1개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "6개월", "goal": "목표", "milestone": "결과물"},
+    {"period": "1년", "goal": "목표", "milestone": "결과물"},
+    {"period": "5년", "goal": "목표", "milestone": "결과물"}
+  ]},
+  {"category": "창업 준비", "phases": [
+  {"period": "1개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "6개월", "goal": "목표", "milestone": "결과물"},
+  {"period": "1년", "goal": "목표", "milestone": "결과물"},
+  {"period": "5년", "goal": "목표", "milestone": "결과물"}
+  ]}
   ]
 }
 
@@ -122,7 +97,7 @@ roadmap의 각 goal과 milestone은 학생의 일지 내용, 강점, 부족한 �
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
+        max_tokens: 1800,
         messages: [{ role: 'user', content: prompt }]
       })
     })

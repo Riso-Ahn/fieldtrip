@@ -11,8 +11,8 @@ import { GAP_SKILLS } from '../lib/constants'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
-const PERIODS = ['1개월', '3개월', '6개월', '1년', '3년', '5년']
-const PERIOD_COLORS = ['#1a1a1a', '#2D6A4F', '#40916C', '#52B788', '#74C69D', '#95D5B2']
+const PERIODS = ['1개월', '6개월', '1년', '5년']
+const PERIOD_COLORS = ['#1a1a1a', '#40916C', '#52B788', '#95D5B2']
 
 function GanttChart({ roadmap }) {
   const [hoveredCell, setHoveredCell] = useState(null)
