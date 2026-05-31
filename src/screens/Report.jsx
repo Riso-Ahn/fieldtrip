@@ -107,7 +107,7 @@ export default function Report() {
   async function generateReport(entriesData) {
     setAiLoading(true)
     try {
-      const res = await fetch('/.netlify/functions/generate-report', {
+      const res = await fetch('https://npnwwqelrlrwletssnxo.supabase.co/functions/v1/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
