@@ -9,6 +9,7 @@ import DayN from './screens/DayN'
 import Day5 from './screens/Day5'
 import Admin from './screens/Admin'
 import StudentDetail from './screens/StudentDetail'
+import Report from './screens/Report'
 
 export const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/day5" element={isLoggedIn && !isAdmin ? <Day5 /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isLoggedIn && isAdmin ? <Admin /> : <Navigate to="/login" />} />
         <Route path="/admin/student/:id" element={isLoggedIn && isAdmin ? <StudentDetail /> : <Navigate to="/login" />} />
+        <Route path="/report" element={isLoggedIn && !isAdmin ? <Report /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/login'} />} />
       </Routes>
     </AuthContext.Provider>

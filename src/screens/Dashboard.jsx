@@ -85,9 +85,9 @@ export default function Dashboard() {
           <button
             className="btn btn-primary"
             style={{ width: '100%' }}
-            onClick={() => navigate('/day5')}
+            onClick={() => navigate('/report')}
           >
-            📊 최종 진로계획 확인 및 AI 분석
+            📊 최종 진로계획 리포트 보기
           </button>
         </div>
       )}
