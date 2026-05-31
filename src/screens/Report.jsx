@@ -14,6 +14,26 @@ ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, 
 const PERIODS = ['1개월', '6개월', '1년', '5년']
 const PERIOD_COLORS = ['#1a1a1a', '#40916C', '#52B788', '#95D5B2']
 
+function buildPrompt(entriesData, profile) {
+  const entries = typeof entriesData === 'object' && !Array.isArray(entriesData)
+    ? Object.entries(entriesData).map(([k, v]) => ({ day_number: parseInt(k), content: v }))
+    : entriesData
+
+  const journalText = (entries || []).map(e => {
+    const d = e.content
+    if (!d) return ''
+    if (e.day_number === 0) return `[Day 0] 관심분야: ${(d.top3||[]).join(', ')} / 강점: ${[d.str1,d.str2,d.str3].filter(Boolean).join(', ')} / 부족한점: ${[d.weak1,d.weak2,d.weak3].filter(Boolean).join(', ')}`
+    if (e.day_number >= 1 && e.day_number <= 4) return `[Day ${e.day_number}] 오전: ${d.am_place||''} | 오후: ${d.pm_place||''} | 인상: ${d.impression||''} | 영감: ${d.inspiration||''} | 역할: ${d.person||''} | 성장: ${d.need_grow||''}`
+    if (e.day_number === 5) { const s = d.scores||{}; return `[Day 5] 진로: ${d.career||''} | 이유: ${d.reason||''} | 5년후: ${d.future||''} | 점수: ${Object.entries(s).map(([k,v])=>`${k}${v}점`).join(',')} | 1개월: ${d.action1||''} | 1년: ${d.action2||''}` }
+    return ''
+  }).filter(Boolean).join('\n')
+
+  const career = entries?.find(e => e.day_number === 5)?.content?.career || '창업가'
+  const name = profile?.name || profile?.nickname || '학생'
+
+  return `당신은 청소년 진로 코치입니다. 해외 창업 생태계 탐방 프로그램 참가자(${name})의 5일간 일지를 분석해서 아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 절대 포함하지 마세요.\n\n일지:\n${journalText}\n\n{"insight":"2-3문장","career_fit":"2-3문장","strength":"2-3문장","gap_strategy":"2-3문장","message":"한 문장","day_summaries":[{"day":1,"keyword":"키워드","summary":"한 문장"},{"day":2,"keyword":"키워드","summary":"한 문장"},{"day":3,"keyword":"키워드","summary":"한 문장"},{"day":4,"keyword":"키워드","summary":"한 문장"}],"ideal_scores":{"전문 지식 (도메인 이해)":9,"네트워크 / 관계 형성":8,"커뮤니케이션 / 설득력":9,"실행력 / 추진력":9,"창의성 / 문제해결":8,"글로벌 감각 / 언어":7},"roadmap":[{"category":"도메인 학습","phases":[{"period":"1개월","goal":"목표","milestone":"결과물"},{"period":"6개월","goal":"목표","milestone":"결과물"},{"period":"1년","goal":"목표","milestone":"결과물"},{"period":"5년","goal":"목표","milestone":"결과물"}]},{"category":"네트워크 구축","phases":[{"period":"1개월","goal":"목표","milestone":"결과물"},{"period":"6개월","goal":"목표","milestone":"결과물"},{"period":"1년","goal":"목표","milestone":"결과물"},{"period":"5년","goal":"목표","milestone":"결과물"}]},{"category":"실행 경험","phases":[{"period":"1개월","goal":"목표","milestone":"결과물"},{"period":"6개월","goal":"목표","milestone":"결과물"},{"period":"1년","goal":"목표","milestone":"결과물"},{"period":"5년","goal":"목표","milestone":"결과물"}]},{"category":"글로벌 역량","phases":[{"period":"1개월","goal":"목표","milestone":"결과물"},{"period":"6개월","goal":"목표","milestone":"결과물"},{"period":"1년","goal":"목표","milestone":"결과물"},{"period":"5년","goal":"목표","milestone":"결과물"}]},{"category":"창업 준비","phases":[{"period":"1개월","goal":"목표","milestone":"결과물"},{"period":"6개월","goal":"목표","milestone":"결과물"},{"period":"1년","goal":"목표","milestone":"결과물"},{"period":"5년","goal":"목표","milestone":"결과물"}]}]}\n\nideal_scores는 "${career}" 진로 기준으로, roadmap goal/milestone은 일지 내용 반영해서 구체적으로 작성.`
+}
+
 function GanttChart({ roadmap }) {
   const [hoveredCell, setHoveredCell] = useState(null)
   if (!roadmap?.length) return null
@@ -107,22 +127,26 @@ export default function Report() {
   async function generateReport(entriesData) {
     setAiLoading(true)
     try {
-      const res = await fetch('https://npnwwqelrlrwletssnxo.supabase.co/functions/v1/generate-report', {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wbnd3cWVscmxyd2xldHNzbnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjI4MzgsImV4cCI6MjA5NTc5ODgzOH0.ckuC1QzVtcBgFFduP4wjxGH7eGfQRQuCeiB1uYV2a8g`,
+          'x-api-key': import.meta.env.VITE_ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          entries: Object.entries(entriesData || entries).map(([k, v]) => ({ day_number: parseInt(k), content: v })),
-          profile: { name: profile.name || profile.nickname }
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2500,
+          messages: [{ role: 'user', content: buildPrompt(entriesData || entries, profile) }]
         })
       })
-      const json = await res.json()
-      if (json.report) {
-        setReport(json.report)
-        localStorage.setItem(`report_v2_${profile.id}`, JSON.stringify(json.report))
-      }
+      const data = await res.json()
+      const text = data.content?.[0]?.text || '{}'
+      const clean = text.replace(/```json|```/g, '').trim()
+      const reportData = JSON.parse(clean)
+      setReport(reportData)
+      localStorage.setItem(`report_v2_${profile.id}`, JSON.stringify(reportData))
     } catch (e) { console.error(e) }
     setAiLoading(false)
   }
